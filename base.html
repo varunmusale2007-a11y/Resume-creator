@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ResumeCraft AI – Professional Resume Maker & ATS Scanner{% endblock %}</title>
+    <meta name="description" content="Build professional, ATS-optimized resumes and calculate instant rule-based compatibility scores with zero cloud lock-in.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('main.index') }}" class="nav-brand">
+                <span style="font-size:1.5rem;">📄</span>
+                <span>ResumeCraft <span class="nav-brand-badge">AI</span></span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Home</a></li>
+                <li><a href="{{ url_for('main.create_resume') }}" class="nav-link {% if request.endpoint == 'main.create_resume' %}active{% endif %}">Create Resume</a></li>
+                <li><a href="{{ url_for('main.resumes_list') }}" class="nav-link {% if request.endpoint == 'main.resumes_list' %}active{% endif %}">My Resumes</a></li>
+                <li><a href="{{ url_for('main.templates_gallery') }}" class="nav-link {% if request.endpoint == 'main.templates_gallery' %}active{% endif %}">Templates</a></li>
+                <li><a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">About ATS</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="{{ url_for('main.create_resume') }}" class="btn btn-primary btn-sm">
+                    ✨ Build Resume
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container flash-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                            <button type="button" style="background:none; border:none; cursor:pointer; font-size:1.1rem;" onclick="this.parentElement.remove();">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% if error_title %}
+                <div class="card" style="text-align:center; padding:60px 20px; margin:40px 0;">
+                    <h1 style="font-size:3rem; color:var(--danger); margin-bottom:12px;">{{ error_code or '⚠️' }}</h1>
+                    <h2 style="font-size:1.8rem; margin-bottom:12px;">{{ error_title }}</h2>
+                    <p style="color:var(--text-muted); max-width:500px; margin:0 auto 24px;">{{ error_message }}</p>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Return to Home</a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">ResumeCraft AI</div>
+                    <p style="max-width:340px; margin-bottom:12px; font-size:0.88rem;">
+                        Professional, ATS-compliant resume creator with transparent rule-based compatibility scoring. 100% local, offline-first, and private.
+                    </p>
+                    <span class="badge badge-secondary" style="background:#1e293b; color:#94a3b8; border:1px solid #334155;">
+                        🔒 100% Offline &amp; Local First – No Cloud APIs Required
+                    </span>
+                </div>
+                <div>
+                    <h4 style="color:#fff; margin-bottom:12px; font-size:0.95rem;">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('main.create_resume') }}">Resume Wizard</a></li>
+                        <li><a href="{{ url_for('main.resumes_list') }}">Saved Resumes</a></li>
+                        <li><a href="{{ url_for('main.templates_gallery') }}">Resume Templates</a></li>
+                        <li><a href="{{ url_for('main.about') }}">ATS Scoring Mechanics</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color:#fff; margin-bottom:12px; font-size:0.95rem;">ATS Categories</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('main.about') }}#contact">Contact Details (10 pts)</a></li>
+                        <li><a href="{{ url_for('main.about') }}#skills">Skills &amp; Competencies (15 pts)</a></li>
+                        <li><a href="{{ url_for('main.about') }}#experience">Experience &amp; Impact (15 pts)</a></li>
+                        <li><a href="{{ url_for('main.about') }}#jd">Job Description Alignment (10 pts)</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 ResumeCraft AI. Engineered for students, freshers, and professionals.
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

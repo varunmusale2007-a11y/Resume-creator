@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}About ATS Compatibility & Architecture – ResumeCraft AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 32px; padding-bottom: 60px;">
+    <div class="section-title-wrap">
+        <span class="badge badge-primary" style="margin-bottom:10px;">Transparent &amp; Local</span>
+        <h1 class="section-title">How ATS Scoring &amp; ResumeCraft AI Work</h1>
+        <p class="section-subtitle">
+            An open, transparent guide to Applicant Tracking System parsers, our 100-point rule-based algorithm, and local-first architecture.
+        </p>
+    </div>
+
+    <!-- Core Pillars Card -->
+    <div class="card" style="margin-bottom:32px;">
+        <h2 style="font-size:1.4rem; font-weight:700; color:var(--dark); margin-bottom:12px;">
+            What is an Applicant Tracking System (ATS)?
+        </h2>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.7; margin-bottom:16px;">
+            An Applicant Tracking System (ATS) is automated software used by enterprise recruiters and hiring teams to ingest, parse, index, and filter incoming job applications. Most ATS parsers extract candidate data into plain text fields (Contact Details, Skills, Experience, Education) before ranking candidates against job description requirements.
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.7;">
+            Overly complex multi-column tables, decorative graphical elements, non-standard section titles, and images can cause ATS parsers to fail. ResumeCraft AI ensures your resume follows standard, machine-readable hierarchies that parse flawlessly.
+        </p>
+    </div>
+
+    <!-- 100-Point Scoring System Breakdown -->
+    <div class="card" style="margin-bottom:32px;">
+        <h2 style="font-size:1.4rem; font-weight:700; color:var(--dark); margin-bottom:16px;">
+            The 100-Point Transparent Scoring System
+        </h2>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span id="contact">1. Contact Information</span>
+                    <span class="badge badge-primary">10 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Evaluates completeness of full name, valid email structure, phone number, location, and verified LinkedIn/GitHub links.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span>2. Professional Summary</span>
+                    <span class="badge badge-primary">10 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Checks for concise 25–90 word summary mentioning target role and primary domain strengths.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span id="skills">3. Technical &amp; Soft Skills</span>
+                    <span class="badge badge-primary">15 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Analyzes presence of programming languages, frameworks, developer tools, databases, and key soft competencies.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span id="experience">4. Work Experience / Internships</span>
+                    <span class="badge badge-primary">15 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Rewards strong past-tense action verbs (Architected, Developed, Optimized) and measurable metrics.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span>5. Projects Section</span>
+                    <span class="badge badge-primary">15 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Evaluates project titles, technology stacks, problem descriptions, outcomes, and code repository links.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span>6. Education Background</span>
+                    <span class="badge badge-primary">10 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Checks degree name, university/institution, graduation year, and academic coursework/grades.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span id="jd">7. Keywords &amp; Job Alignment</span>
+                    <span class="badge badge-primary">10 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Extracts keywords from your target Job Description and calculates exact overlap vs missing keyword gaps.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span>8. ATS Formatting &amp; Readability</span>
+                    <span class="badge badge-primary">10 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Ensures standard section headers, absence of wall-of-text blocks, and zero non-standard symbols.
+                </p>
+            </div>
+
+            <div style="background:var(--bg-main); padding:16px; border-radius:8px; border:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--dark); margin-bottom:6px;">
+                    <span>9. Additional Value Sections</span>
+                    <span class="badge badge-primary">5 pts</span>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-muted);">
+                    Rewards verified certifications, hackathons, academic honors, and languages.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local-First & Privacy Section -->
+    <div class="card" style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#fff; padding:32px;">
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:12px;">
+            🔒 100% Local-First &amp; Zero Cloud API Dependency
+        </h2>
+        <p style="color:#cbd5e1; font-size:0.95rem; line-height:1.7; margin-bottom:16px;">
+            Unlike online platforms that upload your personal data to remote servers or charge subscriptions for PDF exports, ResumeCraft AI runs completely on your own machine.
+        </p>
+        <ul style="padding-left:20px; color:#94a3b8; font-size:0.9rem; line-height:1.6;">
+            <li>All resume drafts and scans are stored securely in local SQLite (<code>database.db</code>).</li>
+            <li>PDFs are compiled locally using Python's high-performance ReportLab engine.</li>
+            <li>Writing improvements and keyword extractions use deterministic local Python algorithms without third-party API keys.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

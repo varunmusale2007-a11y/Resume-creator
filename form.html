@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Builder Wizard – ResumeCraft AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 24px; padding-bottom: 60px;">
+    <!-- Top Action Bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+        <div>
+            <h1 style="font-size:1.75rem; font-weight:800; color:var(--dark); margin-bottom:4px;">
+                {% if is_edit %}Edit Resume{% else %}Create Your Professional Resume{% endif %}
+            </h1>
+            <p style="color:var(--text-muted); font-size:0.9rem;">
+                Complete the steps below. You can skip any optional sections that do not apply to you.
+            </p>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button type="button" id="btn-load-demo" class="btn btn-secondary btn-sm" title="Populate with sample student/fresher resume">
+                ⚡ Load Demo Data
+            </button>
+            <button type="button" id="btn-save-resume" class="btn btn-primary btn-sm">
+                💾 Save Resume
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Completion Progress Card -->
+    <div class="card" style="padding:14px 20px; margin-bottom:20px; background:var(--bg-card); border:1px solid var(--border-color);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:0.88rem; font-weight:700; color:var(--dark);">
+                📊 Resume Strength &amp; Completeness
+            </span>
+            <span id="completion-pct-text" class="badge badge-primary" style="font-size:0.85rem;">0%</span>
+        </div>
+        <div class="progress-bar-container" style="margin:0;">
+            <div id="completion-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <!-- Stepper Navigation Header -->
+    <div class="stepper-container">
+        <div class="stepper">
+            <div class="step-item active" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Personal</div>
+            </div>
+            <div class="step-item" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Summary</div>
+            </div>
+            <div class="step-item" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Education</div>
+            </div>
+            <div class="step-item" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-label">Experience</div>
+            </div>
+            <div class="step-item" data-step="5">
+                <div class="step-circle">5</div>
+                <div class="step-label">Internships</div>
+            </div>
+            <div class="step-item" data-step="6">
+                <div class="step-circle">6</div>
+                <div class="step-label">Skills</div>
+            </div>
+            <div class="step-item" data-step="7">
+                <div class="step-circle">7</div>
+                <div class="step-label">Projects</div>
+            </div>
+            <div class="step-item" data-step="8">
+                <div class="step-circle">8</div>
+                <div class="step-label">Certifications</div>
+            </div>
+            <div class="step-item" data-step="9">
+                <div class="step-circle">9</div>
+                <div class="step-label">Review</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Container (Multi-Step Panes) -->
+    <form id="resume-form" onsubmit="return false;">
+        <input type="hidden" id="resume_id" value="{{ resume_id or '' }}">
+        <input type="hidden" id="selected_template" value="{{ template_name or 'modern' }}">
+
+        <!-- ================= STEP 1: Personal Info ================= -->
+        <div class="card step-pane" id="step-pane-1">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">1. Personal &amp; Contact Information</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Essential contact details for recruiter outreach.</p>
+                </div>
+                <span class="badge badge-primary">Step 1 of 9</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" class="form-control" placeholder="e.g. Aarav Sharma" value="{{ resume_data.personal.full_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="job_title">Target Job Title / Professional Role</label>
+                    <input type="text" id="job_title" class="form-control" placeholder="e.g. Software Engineer / AI Enthusiast" value="{{ resume_data.personal.job_title }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address *</label>
+                    <input type="email" id="email" class="form-control" placeholder="e.g. aarav.sharma@example.com" value="{{ resume_data.personal.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="e.g. +91 98765 43210" value="{{ resume_data.personal.phone }}" required>
+                </div>
+            </div>
+
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label" for="city">City</label>
+                    <input type="text" id="city" class="form-control" placeholder="e.g. Bengaluru" value="{{ resume_data.personal.city }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="state">State / Province</label>
+                    <input type="text" id="state" class="form-control" placeholder="e.g. Karnataka" value="{{ resume_data.personal.state }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="country">Country</label>
+                    <input type="text" id="country" class="form-control" placeholder="e.g. India" value="{{ resume_data.personal.country }}">
+                </div>
+            </div>
+
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label" for="linkedin">LinkedIn URL <span class="optional">(Optional)</span></label>
+                    <input type="url" id="linkedin" class="form-control" placeholder="https://linkedin.com/in/username" value="{{ resume_data.personal.linkedin }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="github">GitHub URL <span class="optional">(Optional)</span></label>
+                    <input type="url" id="github" class="form-control" placeholder="https://github.com/username" value="{{ resume_data.personal.github }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="portfolio">Portfolio / Website <span class="optional">(Optional)</span></label>
+                    <input type="url" id="portfolio" class="form-control" placeholder="https://myportfolio.dev" value="{{ resume_data.personal.portfolio }}">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                <button type="button" class="btn btn-primary btn-next-step">Next: Professional Summary &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 2: Summary ================= -->
+        <div class="card step-pane" id="step-pane-2" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">2. Professional Summary &amp; Career Objective</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Concise 3–4 sentence overview of your strengths, domain, and goals.</p>
+                </div>
+                <span class="badge badge-primary">Step 2 of 9</span>
+            </div>
+
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+                    <label class="form-label" for="summary_text" style="margin-bottom:0;">Summary Text</label>
+                    <button type="button" id="btn-generate-summary" class="btn btn-sm btn-outline-primary">
+                        ✨ Synthesize Honest Summary
+                    </button>
+                </div>
+                <textarea id="summary_text" class="form-control" style="min-height:120px;" placeholder="Passionate Computer Science graduate specializing in AI and backend systems. Experienced in Python, Flask, and SQL through real-world projects...">{{ resume_data.summary.text }}</textarea>
+                <div class="form-hint">Tip: If you're a fresher or student, clicking the assistant button will automatically write a truthful summary based on your actual education and skills.</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="target_role">Target Role</label>
+                    <input type="text" id="target_role" class="form-control" placeholder="e.g. Junior Software Engineer" value="{{ resume_data.summary.target_role }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="years_experience">Experience Level</label>
+                    <input type="text" id="years_experience" class="form-control" placeholder="e.g. Fresher / 1 Year Internship" value="{{ resume_data.summary.years_experience }}">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Education &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 3: Education ================= -->
+        <div class="card step-pane" id="step-pane-3" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">3. Education Background</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Add your degrees, college/school details, grades, and academic achievements.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="addEducationEntry()">+ Add Education</button>
+            </div>
+
+            <div id="education-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Work Experience &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 4: Experience ================= -->
+        <div class="card step-pane" id="step-pane-4" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">4. Work Experience</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Full-time or part-time professional roles. Freshers can skip this section.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="addExperienceEntry()">+ Add Experience</button>
+            </div>
+
+            <div id="experience-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Internships &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 5: Internships ================= -->
+        <div class="card step-pane" id="step-pane-5" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">5. Internships &amp; Practical Training</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Especially valuable for students, freshers, and early-career candidates.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="addInternshipEntry()">+ Add Internship</button>
+            </div>
+
+            <div id="internship-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Skills &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 6: Skills ================= -->
+        <div class="card step-pane" id="step-pane-6" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">6. Skills &amp; Competencies</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Type a skill and press Enter or click the suggestion chips below.</p>
+                </div>
+                <span class="badge badge-primary">Step 6 of 9</span>
+            </div>
+
+            <!-- Technical Skills -->
+            <div class="form-group">
+                <label class="form-label">Technical / Programming Skills *</label>
+                <div class="tag-input-container" id="container-technical-skills">
+                    <input type="text" id="input-technical-skill" class="tag-input" placeholder="Type skill (e.g. Python, SQL) &amp; press Enter...">
+                </div>
+                <div class="suggestion-chips">
+                    <span style="font-size:0.78rem; color:var(--text-muted); margin-right:4px;">Quick Add:</span>
+                    <button type="button" class="chip-btn" data-skill="Python" data-target="technical">+ Python</button>
+                    <button type="button" class="chip-btn" data-skill="Java" data-target="technical">+ Java</button>
+                    <button type="button" class="chip-btn" data-skill="C++" data-target="technical">+ C++</button>
+                    <button type="button" class="chip-btn" data-skill="SQL" data-target="technical">+ SQL</button>
+                    <button type="button" class="chip-btn" data-skill="Machine Learning" data-target="technical">+ Machine Learning</button>
+                    <button type="button" class="chip-btn" data-skill="Data Structures" data-target="technical">+ Data Structures</button>
+                    <button type="button" class="chip-btn" data-skill="REST APIs" data-target="technical">+ REST APIs</button>
+                </div>
+            </div>
+
+            <!-- Developer Tools -->
+            <div class="form-group">
+                <label class="form-label">Frameworks, Databases &amp; Developer Tools</label>
+                <div class="tag-input-container" id="container-tools-skills">
+                    <input type="text" id="input-tools-skill" class="tag-input" placeholder="Type tool (e.g. Flask, Docker, Git) &amp; press Enter...">
+                </div>
+                <div class="suggestion-chips">
+                    <span style="font-size:0.78rem; color:var(--text-muted); margin-right:4px;">Quick Add:</span>
+                    <button type="button" class="chip-btn" data-skill="Flask" data-target="tools">+ Flask</button>
+                    <button type="button" class="chip-btn" data-skill="Git" data-target="tools">+ Git</button>
+                    <button type="button" class="chip-btn" data-skill="GitHub" data-target="tools">+ GitHub</button>
+                    <button type="button" class="chip-btn" data-skill="Docker" data-target="tools">+ Docker</button>
+                    <button type="button" class="chip-btn" data-skill="PostgreSQL" data-target="tools">+ PostgreSQL</button>
+                    <button type="button" class="chip-btn" data-skill="SQLite" data-target="tools">+ SQLite</button>
+                    <button type="button" class="chip-btn" data-skill="VS Code" data-target="tools">+ VS Code</button>
+                </div>
+            </div>
+
+            <!-- Soft Skills -->
+            <div class="form-group">
+                <label class="form-label">Soft Skills &amp; Professional Competencies</label>
+                <div class="tag-input-container" id="container-soft-skills">
+                    <input type="text" id="input-soft-skill" class="tag-input" placeholder="Type soft skill &amp; press Enter...">
+                </div>
+                <div class="suggestion-chips">
+                    <span style="font-size:0.78rem; color:var(--text-muted); margin-right:4px;">Quick Add:</span>
+                    <button type="button" class="chip-btn" data-skill="Problem Solving" data-target="soft">+ Problem Solving</button>
+                    <button type="button" class="chip-btn" data-skill="Teamwork" data-target="soft">+ Teamwork</button>
+                    <button type="button" class="chip-btn" data-skill="Effective Communication" data-target="soft">+ Effective Communication</button>
+                    <button type="button" class="chip-btn" data-skill="Time Management" data-target="soft">+ Time Management</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Projects &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 7: Projects ================= -->
+        <div class="card step-pane" id="step-pane-7" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">7. Key Technical Projects</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Crucial for all candidates. Highlight technologies, problem statements, and outcomes.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="addProjectEntry()">+ Add Project</button>
+            </div>
+
+            <div id="project-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Certifications &amp; Achievements &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 8: Certifications & Achievements ================= -->
+        <div class="card step-pane" id="step-pane-8" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">8. Certifications &amp; Achievements</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Add verified credentials, hackathons, academic honors, and leadership.</p>
+                </div>
+                <span class="badge badge-primary">Step 8 of 9</span>
+            </div>
+
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                📜 Certifications &amp; Online Courses
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addCertificationEntry()">+ Add Cert</button>
+            </h3>
+            <div id="cert-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <hr style="border:none; border-top:1px solid var(--border-color); margin:24px 0;">
+
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                🏆 Honors, Hackathons &amp; Achievements
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addAchievementEntry()">+ Add Honor</button>
+            </h3>
+            <div id="ach-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <button type="button" class="btn btn-primary btn-next-step">Next: Final Review &rarr;</button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 9: Additional & Review ================= -->
+        <div class="card step-pane" id="step-pane-9" style="display:none;">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">9. Languages, Interests &amp; Final Review</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Select your preferred template, verify your information, and generate your resume.</p>
+                </div>
+                <span class="badge badge-success">Final Step</span>
+            </div>
+
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                🌐 Languages Known
+                <button type="button" class="btn btn-sm btn-secondary" onclick="addLanguageEntry()">+ Add Language</button>
+            </h3>
+            <div id="lang-list">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+                <label class="form-label" for="interests_text">Interests / Hobbies <span class="optional">(Comma separated)</span></label>
+                <input type="text" id="interests_text" class="form-control" placeholder="e.g. Open Source, Competitive Programming, System Design, Robotics">
+            </div>
+
+            <div class="card" style="background:var(--bg-subtle); border:1px solid var(--border-color); padding:20px; margin:24px 0;">
+                <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:12px; color:var(--dark);">
+                    🎨 Choose Your Resume Template
+                </h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                    <label style="border:2px solid var(--primary); padding:12px; border-radius:8px; background:#fff; cursor:pointer; display:block;">
+                        <input type="radio" name="template_choice" value="modern" checked onchange="document.getElementById('selected_template').value=this.value;">
+                        <strong>Modern Clean</strong>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Blue accent dividers, modern typography, optimal hierarchy.</p>
+                    </label>
+                    <label style="border:1px solid var(--border-color); padding:12px; border-radius:8px; background:#fff; cursor:pointer; display:block;">
+                        <input type="radio" name="template_choice" value="minimal" onchange="document.getElementById('selected_template').value=this.value;">
+                        <strong>Minimal ATS</strong>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Strict monochrome standard layout, maximum parse rate.</p>
+                    </label>
+                    <label style="border:1px solid var(--border-color); padding:12px; border-radius:8px; background:#fff; cursor:pointer; display:block;">
+                        <input type="radio" name="template_choice" value="professional" onchange="document.getElementById('selected_template').value=this.value;">
+                        <strong>Professional Classic</strong>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Navy corporate styling, clean executive layout.</p>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:28px;">
+                <button type="button" class="btn btn-secondary btn-prev-step">&larr; Back</button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="handleFinishResume('preview')">
+                        👁️ Preview &amp; Download PDF
+                    </button>
+                    <button type="button" class="btn btn-accent btn-lg" onclick="handleFinishResume('ats')">
+                        ⚡ Scan with ATS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Pre-populate server data if editing or initial state
+    const initialData = {{ resume_data | tojson }};
+    document.addEventListener('DOMContentLoaded', () => {
+        if (initialData && (initialData.personal.full_name || initialData.education.length > 0)) {
+            populateFormWithData(initialData);
+        } else {
+            // Default 1 education, 1 project entry for fresh form
+            addEducationEntry();
+            addProjectEntry();
+            addLanguageEntry({ language: 'English', proficiency: 'Fluent' });
+        }
+    });
+
+    async function handleFinishResume(destination) {
+        const saveRes = await saveResumeToServer(false);
+        if (saveRes && saveRes.success) {
+            if (destination === 'ats') {
+                window.location.href = saveRes.ats_url;
+            } else {
+                window.location.href = saveRes.preview_url;
+            }
+        }
+    }
+</script>
+{% endblock %}

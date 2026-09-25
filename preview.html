@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resume.title or "Resume Preview" }} – ResumeCraft AI{% endblock %}
+
+{% block content %}
+<div class="container-wide" style="padding-top: 24px; padding-bottom: 60px;">
+    <!-- Top Action Bar -->
+    <div class="card" style="margin-bottom: 24px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <div>
+                <h1 style="font-size:1.4rem; font-weight:800; color:var(--dark); margin-bottom:2px;">
+                    {{ data.personal.full_name or "Resume Preview" }}
+                </h1>
+                <span style="font-size:0.85rem; color:var(--text-muted);">
+                    {{ data.personal.job_title or data.summary.target_role or "Professional Resume" }} &bull; Completion: {{ completion_pct }}%
+                </span>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <!-- Template Selector -->
+            <div style="display:flex; align-items:center; gap:8px;">
+                <label for="template-select" style="font-size:0.88rem; font-weight:600; color:var(--dark);">Template:</label>
+                <select id="template-select" class="form-control" style="width:auto; padding:6px 12px; font-size:0.88rem;" onchange="changeTemplate(this.value)">
+                    <option value="modern" {% if template_name == 'modern' %}selected{% endif %}>Modern Clean</option>
+                    <option value="minimal" {% if template_name == 'minimal' %}selected{% endif %}>Minimal ATS</option>
+                    <option value="professional" {% if template_name == 'professional' %}selected{% endif %}>Professional Classic</option>
+                </select>
+            </div>
+
+            <a href="{{ url_for('main.create_resume', resume_id=resume_id) }}" class="btn btn-secondary btn-sm">
+                ✏️ Edit Resume
+            </a>
+
+            <a href="{{ url_for('main.ats_dashboard', resume_id=resume_id) }}" class="btn btn-accent btn-sm">
+                ⚡ ATS Scanner
+            </a>
+
+            <a href="{{ url_for('main.download_pdf', resume_id=resume_id, template=template_name) }}" class="btn btn-primary btn-sm">
+                📥 Download PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Live A4 Resume Preview -->
+    <div class="resume-preview-wrapper">
+        <div class="resume-sheet tpl-{{ template_name }}">
+            <!-- Header (Personal Details) -->
+            <div class="sheet-header">
+                <div class="sheet-name">{{ data.personal.full_name or "Your Full Name" }}</div>
+                {% if data.personal.job_title %}
+                    <div class="sheet-target-title">{{ data.personal.job_title }}</div>
+                {% endif %}
+                <div class="sheet-contact">
+                    {% set loc = [data.personal.city, data.personal.state, data.personal.country] | select | join(', ') %}
+                    {% if loc %}<span>📍 {{ loc }}</span>{% endif %}
+                    {% if data.personal.phone %}<span>📞 {{ data.personal.phone }}</span>{% endif %}
+                    {% if data.personal.email %}<span>✉️ <a href="mailto:{{ data.personal.email }}">{{ data.personal.email }}</a></span>{% endif %}
+                    {% if data.personal.linkedin %}<span>🔗 <a href="{{ data.personal.linkedin }}" target="_blank">LinkedIn</a></span>{% endif %}
+                    {% if data.personal.github %}<span>🐙 <a href="{{ data.personal.github }}" target="_blank">GitHub</a></span>{% endif %}
+                    {% if data.personal.portfolio %}<span>🌐 <a href="{{ data.personal.portfolio }}" target="_blank">Portfolio</a></span>{% endif %}
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            {% if data.summary.text %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Professional Summary</div>
+                <p style="font-size:0.88rem; color:#1f2937; line-height:1.5;">
+                    {{ data.summary.text }}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Technical & Core Skills -->
+            {% if data.skills.technical or data.skills.tools or data.skills.soft %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Skills &amp; Competencies</div>
+                <div style="font-size:0.86rem; line-height:1.6;">
+                    {% if data.skills.technical %}
+                        <div><strong>Technical Skills:</strong> {{ data.skills.technical | join(', ') }}</div>
+                    {% endif %}
+                    {% if data.skills.tools %}
+                        <div><strong>Tools &amp; Technologies:</strong> {{ data.skills.tools | join(', ') }}</div>
+                    {% endif %}
+                    {% if data.skills.soft %}
+                        <div><strong>Soft Skills:</strong> {{ data.skills.soft | join(', ') }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Work Experience -->
+            {% if data.experience and data.experience | length > 0 %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Work Experience</div>
+                {% for exp in data.experience %}
+                <div class="sheet-item">
+                    <div class="sheet-item-header">
+                        <div class="sheet-item-title">{{ exp.title }} &bull; {{ exp.company }}</div>
+                        <div class="sheet-item-meta">
+                            {{ exp.start_date }} – {% if exp.is_current %}Present{% else %}{{ exp.end_date }}{% endif %}
+                            {% if exp.location %}({{ exp.location }}){% endif %}
+                        </div>
+                    </div>
+                    {% if exp.responsibilities %}
+                    <ul class="sheet-bullet-list">
+                        {% for line in exp.responsibilities.split('\n') if line.strip() %}
+                            <li>{{ line.lstrip('•-* ').strip() }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if exp.achievements %}
+                        <div style="font-size:0.82rem; color:#374151; margin-top:2px;"><strong>Key Achievement:</strong> {{ exp.achievements }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Internships -->
+            {% if data.internships and data.internships | length > 0 %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Internships</div>
+                {% for intern in data.internships %}
+                <div class="sheet-item">
+                    <div class="sheet-item-header">
+                        <div class="sheet-item-title">{{ intern.role }} &bull; {{ intern.company }}</div>
+                        <div class="sheet-item-meta">
+                            {{ intern.start_date }} – {{ intern.end_date }}
+                            {% if intern.location %}({{ intern.location }}){% endif %}
+                        </div>
+                    </div>
+                    {% if intern.responsibilities %}
+                    <ul class="sheet-bullet-list">
+                        {% for line in intern.responsibilities.split('\n') if line.strip() %}
+                            <li>{{ line.lstrip('•-* ').strip() }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if intern.skills_used %}
+                        <div style="font-size:0.82rem; color:#475569; margin-top:2px;"><strong>Skills Used:</strong> {{ intern.skills_used }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Projects -->
+            {% if data.projects and data.projects | length > 0 %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Key Projects</div>
+                {% for proj in data.projects %}
+                <div class="sheet-item">
+                    <div class="sheet-item-header">
+                        <div class="sheet-item-title">
+                            {{ proj.title }}
+                            {% if proj.technologies %}<span style="font-weight:400; font-style:italic; color:#475569;">| {{ proj.technologies }}</span>{% endif %}
+                        </div>
+                        <div class="sheet-item-meta">
+                            {% if proj.github_url %}<a href="{{ proj.github_url }}" target="_blank">Repository</a>{% endif %}
+                            {% if proj.github_url and proj.live_url %} | {% endif %}
+                            {% if proj.live_url %}<a href="{{ proj.live_url }}" target="_blank">Live Demo</a>{% endif %}
+                        </div>
+                    </div>
+                    <ul class="sheet-bullet-list">
+                        {% if proj.description %}<li>{{ proj.description }}</li>{% endif %}
+                        {% if proj.features %}<li><strong>Features:</strong> {{ proj.features }}</li>{% endif %}
+                        {% if proj.results %}<li><strong>Impact:</strong> {{ proj.results }}</li>{% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Education -->
+            {% if data.education and data.education | length > 0 %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Education</div>
+                {% for edu in data.education %}
+                <div class="sheet-item">
+                    <div class="sheet-item-header">
+                        <div class="sheet-item-title">
+                            {{ edu.degree }}{% if edu.field %} in {{ edu.field }}{% endif %}
+                            <div style="font-weight:500; font-size:0.85rem; color:#374151;">{{ edu.institution }}{% if edu.location %}, {{ edu.location }}{% endif %}</div>
+                        </div>
+                        <div class="sheet-item-meta">
+                            {{ edu.start_year }} – {{ edu.end_year }}
+                            {% if edu.grade %}<div style="font-weight:700;">{{ edu.grade }}</div>{% endif %}
+                        </div>
+                    </div>
+                    {% if edu.coursework %}
+                        <div style="font-size:0.82rem; color:#475569; margin-top:2px;"><strong>Relevant Coursework:</strong> {{ edu.coursework }}</div>
+                    {% endif %}
+                    {% if edu.achievements %}
+                        <div style="font-size:0.82rem; color:#475569; margin-top:2px;"><strong>Honors:</strong> {{ edu.achievements }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Certifications -->
+            {% if data.certifications and data.certifications | length > 0 %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Certifications</div>
+                <ul class="sheet-bullet-list">
+                    {% for cert in data.certifications %}
+                    <li>
+                        <strong>{{ cert.name }}</strong> – {{ cert.issuer }}
+                        {% if cert.date %}({{ cert.date }}){% endif %}
+                        {% if cert.credential_url %} [<a href="{{ cert.credential_url }}" target="_blank">Verify</a>]{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Achievements & Extracurriculars -->
+            {% if (data.achievements and data.achievements | length > 0) or (data.extracurricular and data.extracurricular | length > 0) %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Achievements &amp; Leadership</div>
+                <ul class="sheet-bullet-list">
+                    {% for ach in data.achievements %}
+                    <li><strong>{{ ach.title }}:</strong> {{ ach.description }}</li>
+                    {% endfor %}
+                    {% for extra in data.extracurricular %}
+                    <li><strong>{{ extra.activity }} {% if extra.role %}({{ extra.role }}){% endif %}:</strong> {{ extra.description }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Languages & Interests -->
+            {% if (data.languages and data.languages | length > 0) or data.interests %}
+            <div class="sheet-section">
+                <div class="sheet-section-title">Languages &amp; Interests</div>
+                <div style="font-size:0.86rem;">
+                    {% if data.languages and data.languages | length > 0 %}
+                    <div>
+                        <strong>Languages:</strong>
+                        {% for l in data.languages %}
+                            {{ l.language }}{% if l.proficiency %} ({{ l.proficiency }}){% endif %}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if data.interests %}
+                    <div>
+                        <strong>Interests:</strong>
+                        {% if data.interests is string %}{{ data.interests }}{% else %}{{ data.interests | join(', ') }}{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function changeTemplate(templateName) {
+        window.location.href = `{{ url_for('main.preview_resume', resume_id=resume_id) }}?template=${templateName}`;
+    }
+</script>
+{% endblock %}

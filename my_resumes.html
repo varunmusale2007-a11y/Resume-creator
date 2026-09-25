@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}My Saved Resumes – ResumeCraft AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 28px; padding-bottom: 60px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+        <div>
+            <h1 style="font-size:1.8rem; font-weight:800; color:var(--dark); margin-bottom:4px;">
+                My Saved Resumes
+            </h1>
+            <p style="color:var(--text-muted); font-size:0.92rem;">
+                Manage, edit, scan, and download your locally stored resumes.
+            </p>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <a href="{{ url_for('main.create_resume') }}" class="btn btn-primary">
+                + Create New Resume
+            </a>
+        </div>
+    </div>
+
+    {% if resumes and resumes | length > 0 %}
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            {% for r in resumes %}
+            <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                        <span class="badge badge-primary">{{ r.template_name | capitalize }} Template</span>
+                        {% if r.ats_score > 0 %}
+                            <span class="badge badge-{% if r.ats_score >= 80 %}success{% elif r.ats_score >= 60 %}primary{% else %}warning{% endif %}">
+                                ATS: {{ r.ats_score }}/100
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h2 style="font-size:1.2rem; font-weight:700; color:var(--dark); margin-bottom:4px;">
+                        {{ r.title }}
+                    </h2>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
+                        Last updated: {{ r.updated_at }}
+                    </p>
+
+                    <div style="margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; margin-bottom:4px;">
+                            <span>Completion Strength</span>
+                            <span>{{ r.completion_pct }}%</span>
+                        </div>
+                        <div class="progress-bar-container" style="height:6px; margin:0;">
+                            <div class="progress-bar-fill" style="width: {{ r.completion_pct }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-color); padding-top:14px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; gap:6px;">
+                        <a href="{{ url_for('main.create_resume', resume_id=r.id) }}" class="btn btn-sm btn-secondary" title="Edit Resume">
+                            ✏️ Edit
+                        </a>
+                        <a href="{{ url_for('main.preview_resume', resume_id=r.id) }}" class="btn btn-sm btn-secondary" title="Live Preview">
+                            👁️ Preview
+                        </a>
+                        <a href="{{ url_for('main.ats_dashboard', resume_id=r.id) }}" class="btn btn-sm btn-accent" title="ATS Scanner">
+                            ⚡ ATS
+                        </a>
+                        <a href="{{ url_for('main.download_pdf', resume_id=r.id) }}" class="btn btn-sm btn-primary" title="Download PDF">
+                            📥 PDF
+                        </a>
+                    </div>
+
+                    <div style="display:flex; gap:4px;">
+                        <form method="POST" action="{{ url_for('main.duplicate_resume', resume_id=r.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-secondary" title="Duplicate Resume">
+                                📋
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('main.delete_resume', resume_id=r.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this resume?');">
+                            <button type="submit" class="btn btn-sm btn-secondary" style="color:var(--danger);" title="Delete Resume">
+                                🗑️
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align:center; padding:60px 20px; background:var(--bg-card);">
+            <div style="font-size:3.5rem; margin-bottom:12px;">📑</div>
+            <h2 style="font-size:1.5rem; font-weight:700; color:var(--dark); margin-bottom:8px;">No Resumes Found</h2>
+            <p style="color:var(--text-muted); max-width:440px; margin:0 auto 24px; font-size:0.95rem;">
+                You haven't created any resumes yet. Start fresh or load a pre-configured student/fresher demo resume to explore all features.
+            </p>
+            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                <a href="{{ url_for('main.create_resume') }}" class="btn btn-primary">
+                    ✨ Create New Resume
+                </a>
+                <a href="{{ url_for('main.templates_gallery') }}" class="btn btn-secondary">
+                    📑 Browse Templates
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
